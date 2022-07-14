@@ -1,7 +1,17 @@
 import SwiftUI
 
+
 struct ContentView: View {
     @State var vkServices: [Services] = []
+    
+    func loadServices() {
+        self.vkServices = []
+        JsonParser().load() { appsInfo in
+            for appInfo in appsInfo.body.services {
+                self.vkServices.append(appInfo)
+            }
+        }
+    }
     
     let myColors: [Color] = [Color.white, Color.white, Color.purple, Color.purple, Color.white, Color.green, Color.orange, Color.white, Color.orange]
     
@@ -12,11 +22,23 @@ struct ContentView: View {
             LinearGradient(colors: [.indigo, .indigo], startPoint: .bottom, endPoint: .top)
                 .edgesIgnoringSafeArea(.all)
             VStack {
-                Text("Сервисы ВК")
-                    .foregroundColor(.white)
-                    .font(.title)
-                    .fontWeight(.black)
-                
+                HStack {
+                    Image(systemName: "chevron.right")
+                        .font(.title)
+                        .foregroundColor(Color.mint)
+                        .padding()
+                    Spacer()
+                    Text("Сервисы ВК")
+                        .foregroundColor(.white)
+                        .font(.title)
+                        .fontWeight(.black)
+                        .padding()
+                    Spacer()
+                    Button("Update") {
+                        self.loadServices()
+                    }
+                    .padding()
+                }
                 List (0..<self.vkServices.count, id: \.self){ number in
                     let serviceUrl = URL(string: self.vkServices[number].link)
                     let iconUrl = URL(string: self.vkServices[number].icon_url)
@@ -65,11 +87,7 @@ struct ContentView: View {
                 }
                 .listStyle(GroupedListStyle())
                 .onAppear {
-                    JsonParser().load() { appsInfo in
-                        for appInfo in appsInfo.body.services {
-                            self.vkServices.append(appInfo)
-                        }
-                    }
+                    self.loadServices()
                 }
             }
         }
